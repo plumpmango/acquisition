@@ -9,6 +9,8 @@
 
 //opencv
 #include <opencv2/imgproc.hpp>
+#include <queue>
+#include <iostream>
 
 using namespace cv;
 
@@ -18,7 +20,7 @@ using namespace cv;
 */
 typedef struct {
     GMainLoop *main_loop; /*!<type de données opaques représentant la boucle principale d'une application GLib ou GTK*/
-	   int buffer_count;/*!<compteur de buffer*/
+	int buffer_count;/*!<compteur de buffer*/
     int frame_number;/*!<nombre d'image*/
     ArvBuffer *last_buffer;/*!< ajouté par chafik*/
 	ArvChunkParser *chunk_parser;/*!<analyseur de token*/
@@ -60,7 +62,6 @@ public:
 	static void stream_cb (void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer);
 
 private:
-
 	char *arv_option_camera_name = NULL;
 	char *arv_option_debug_domains = NULL;
 	gboolean arv_option_snaphot = FALSE;
@@ -84,7 +85,7 @@ private:
 	gboolean arv_option_no_packet_socket = FALSE;
 	char *arv_option_chunks = NULL;
 	unsigned int arv_option_bandwidth_limit = -1;
-    guint software_trigger_source=0;
+  guint software_trigger_source=0;
 	ArvCamera *camera=NULL;
 	ArvStream *stream=NULL;
 

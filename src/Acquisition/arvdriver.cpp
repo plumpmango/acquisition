@@ -73,6 +73,7 @@ ArvDriver::~ArvDriver()
 
 void ArvDriver::startAcquisition()
 {
+
 	GError *error = NULL;
 	int i;
 
@@ -94,6 +95,7 @@ void ArvDriver::startAcquisition()
 		g_print ("Looking for camera '%s'\n", arv_option_camera_name);
 
 	camera = arv_camera_new (arv_option_camera_name);
+	g_print("camera '%s'\n", arv_option_camera_name);
 	if (camera != NULL) {
 		gint payload;
 		gint x, y, width, height;
@@ -178,9 +180,7 @@ void ArvDriver::startAcquisition()
 			printf ("uv bandwidth limit     = %d [%d..%d]\n", arv_camera_uv_get_bandwidth (camera), min, max);
 		}
 
-		printf("before stream\n");
 		stream = arv_camera_create_stream (camera, stream_cb, NULL);
-		printf("after stream\n");
 		if (stream != NULL) {
 			if (ARV_IS_GV_STREAM (stream)) {
 				if (arv_option_auto_socket_buffer)
@@ -206,7 +206,6 @@ void ArvDriver::startAcquisition()
 			for (i = 0; i < 50; i++)
 				arv_stream_push_buffer (stream, arv_buffer_new (payload, NULL));
 
-			printf("paramétrer acquisition\n");
 			arv_camera_set_acquisition_mode (camera, ARV_ACQUISITION_MODE_CONTINUOUS);
 
 			if (arv_option_frequency > 0.0)
@@ -221,16 +220,14 @@ void ArvDriver::startAcquisition()
 										   arv_option_software_trigger),
 									 emit_software_trigger, camera);
 			}
-			printf("start acquisition\n");
+
 			arv_camera_start_acquisition (camera);
-			printf("acquisition ok\n");
+
 			g_signal_connect (stream, "new-buffer", G_CALLBACK (new_buffer_cb), &data);
-			printf("connect signal\n");
 			arv_stream_set_emit_signals (stream, TRUE);
 
-			printf("boucle acquisition\n");
 			data.main_loop = g_main_loop_new (NULL, FALSE);
-			printf("attend arrêt \n");
+
                         //wait until stop acquisition
 			g_main_loop_run (data.main_loop);
 
@@ -258,11 +255,11 @@ void ArvDriver::startAcquisition()
 	if (data.chunks != NULL)
 		g_strfreev (data.chunks);
 
-		g_clear_object (&data.chunk_parser);
+	g_clear_object (&data.chunk_parser);
 
-    g_clear_object (&data.last_buffer);
+        g_clear_object (&data.last_buffer);
 
-		printf("acquisition stopped\n");
+        printf("acquisition stopped\n");
 }
 
 void ArvDriver::stopAcquisition()

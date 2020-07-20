@@ -4,7 +4,7 @@ find_package( OpenCV REQUIRED )
 
 find_package(GTK2 2.6 REQUIRED gtk)
 
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 COMPONENTS REQUIRED Core Gui Widgets)
 
 include(FindPkgConfig)
 pkg_search_module(ARAVIS REQUIRED aravis-0.6 aravis-0.4 aravis-0.2)
@@ -18,28 +18,34 @@ include_directories(
 
 include_directories(${CMAKE_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 
+# need this to include the auto generated ui_mainwindow.h
+# file from the qt5_wrap_ui call below.
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set ( SOURCES
  src/main.cpp
  src/Acquisition/arvdriver.cpp
- src/acquisition.cpp
+ src/Acquisition/acquisition.cpp
+ src/Manage/manage.cpp
 )
 
 set ( MOC_HEADERS
  src/Acquisition/arvdriver.h
- src/acquisition.h
+ src/Acquisition/acquisition.h
+ src/Manage/manage.h
 )
 
-#set ( UIS
-# mainwindow.ui
-#)
+set ( UIS
+ src/Manage/manage.ui
+)
 
 #set ( RESOURCES
-# main.qrc
+ #main.qrc
 #)
 
 
 # using Qt meta-system (precompiler)
-QT5_ADD_RESOURCES( RES_SOURCES ${RESOURCES} )
+#QT5_ADD_RESOURCES( RES_SOURCES ${RESOURCES} )
 QT5_WRAP_UI( UI_HEADERS ${UIS} )
 QT5_WRAP_CPP( MOC_SRCS ${MOC_HEADERS} )
 
