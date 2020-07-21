@@ -1,11 +1,31 @@
 #include "acquisition.h"
 
+char *convertToChar(std::string s){
+  //convert string to char*
+  char charName[s.length()];
+  for(int i = 0; i < sizeof(charName); i++){
+    charName[i] = s[i];
+    std::cout << charName[i];
+  }
+
+
+  return charName;
+}
 
 void Acquisition::startAcquisition(){
   setPathVideo(_pathTosave + "/" + _videoName + ".avi");
   std::cout << getPathVideo() << std::endl;
   frameNumber = 0;
-  m_arv = new ArvDriver();
+
+  // char *charName = convertToChar(getCameraName());
+std::string s = getCameraName();
+  char charName[s.length()];
+  for(int i = 0; i <= sizeof(charName); i++){
+    charName[i] = s[i];
+    std::cout << charName[i];
+  }
+
+  m_arv = new ArvDriver(charName);
   m_arv->startAcquisition();
 
 }

@@ -55,12 +55,12 @@ gboolean ArvDriver::emit_software_trigger (void *abstract_data)
 
 
 
-ArvDriver::ArvDriver()
+ArvDriver::ArvDriver(char *cameraName)
 {
-
+	arv_option_camera_name = cameraName;
 	data.buffer_count = 0;
-    data.frame_number = 0;
-    data.last_buffer=NULL;
+  data.frame_number = 0;
+  data.last_buffer=NULL;
 	data.chunks = NULL;
 	data.chunk_parser = NULL;
 
@@ -88,6 +88,7 @@ void ArvDriver::startAcquisition()
 	arv_g_type_init ();
 
 	arv_debug_enable (arv_option_debug_domains);
+	printf("'%s'\n", arv_option_camera_name);
 
 	if (arv_option_camera_name == NULL)
 		g_print ("Looking for the first available camera\n");
@@ -138,7 +139,7 @@ void ArvDriver::startAcquisition()
 		if (arv_camera_is_uv_device(camera)) {
 			arv_camera_uv_set_bandwidth (camera, arv_option_bandwidth_limit);
 		}
-
+		
 		if (arv_camera_is_gv_device (camera)) {
 			arv_camera_gv_select_stream_channel (camera, arv_option_gv_stream_channel);
 			arv_camera_gv_set_packet_delay (camera, arv_option_gv_packet_delay);
@@ -206,7 +207,7 @@ void ArvDriver::startAcquisition()
 			for (i = 0; i < 50; i++)
 				arv_stream_push_buffer (stream, arv_buffer_new (payload, NULL));
 
-			arv_camera_set_acquisition_mode (camera, ARV_ACQUISITION_MODE_CONTINUOUS);
+			arv_camera_set_acquisition_mode (camera, ARV_ACQUISITION_MODE_MULTI_FRAME);
 
 			if (arv_option_frequency > 0.0)
 				arv_camera_set_frame_rate (camera, arv_option_frequency);

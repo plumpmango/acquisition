@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>80</y>
+      <y>120</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QPushButton" name="stoppushButton">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>80</y>
+      <x>230</x>
+      <y>120</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -43,14 +43,37 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>170</y>
+      <x>20</x>
+      <y>210</y>
       <width>361</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Video save : ./Result/video_yyyy_mm_dd_h_min_sec</string>
+     <string>Video save :  ./Result/video_yyyy_mm_dd_h_min_sec</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="devicesQueueComboBox">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>30</y>
+      <width>171</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Choose device :</string>
     </property>
    </widget>
   </widget>

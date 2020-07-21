@@ -17,11 +17,7 @@ Manage::Manage(std::string path,std::string name,QWidget *parent) :
     stopAc = true;
     timer= new QTimer(this);
     // if(!stopAc)
-    std::queue<std::string> dQ = this->getDevicesQueue();
-    for(int i = 0; i <= dQ.size(); i++){
-      std::cout << dQ.front() << std::endl;
-      dQ.pop();
-    }
+    this->setupDevicesQueueComboBox();
     connect(ui->startpushButton, SIGNAL (released()), this, SLOT (handleStartAcquisition()));
     connect(ui->stoppushButton, SIGNAL (released()), this, SLOT (handleStopAcquisition()));
     connect(timer, SIGNAL(timeout()), this, SLOT(handleAcquire()));
@@ -32,6 +28,16 @@ Manage::~Manage()
     delete ui;
 }
 
+void Manage::setupDevicesQueueComboBox(){
+  ui->devicesQueueComboBox->clear();
+  std::queue<std::string> dQ = this->getDevicesQueue();
+  for(int i = 0; i <= dQ.size(); i++){
+    // std::cout << dQ.front() << std::endl;
+    const QString item = QString::fromStdString(dQ.front());
+    ui->devicesQueueComboBox->addItem(item);
+    dQ.pop();
+  }
+}
 
 void Manage::startAcquisition(){
   time_t now = time(0);
@@ -47,8 +53,9 @@ void Manage::startAcquisition(){
   std::string id = y + "_" + m + "_" + d + "_" + h + "_" + min + "_" + s;
   // setName(_name + id);
   std::string path = getPath();
-  std::string name = getName() + id;
-  acq = new Acquisition(path,name);
+  std::string name = getCameraName() + id;
+  this->setCameraName((ui->devicesQueueComboBox->currentText()).toStdString());
+  acq = new Acquisition(path,name,getCameraName());
   stopAc = false;
   timer->start(33);
   acq->startAcquisition();
@@ -58,7 +65,7 @@ void Manage::startAcquisition(){
 void Manage::stopAcquisition(){
   timer->stop();
   stopAc = acq->stopAcquisition();
-
+  this->setupDevicesQueueComboBox();
 }
 
 std::queue<std::string> Manage::getDevicesQueue(){
