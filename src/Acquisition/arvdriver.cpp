@@ -33,6 +33,7 @@ void ArvDriver::new_buffer_cb (ArvStream *stream, ApplicationData *data)
 void ArvDriver::stream_cb (void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer)
 {
 	if (type == ARV_STREAM_CALLBACK_TYPE_INIT) {
+		printf("type callback ok");
 		if (ArvDriver::arv_option_realtime) {
 			if (!arv_make_thread_realtime (10))
 				printf ("Failed to make stream thread realtime\n");
@@ -55,9 +56,11 @@ gboolean ArvDriver::emit_software_trigger (void *abstract_data)
 
 
 
-ArvDriver::ArvDriver(char *cameraName)
+ArvDriver::ArvDriver(char *cameraName,double frequency,gint64 delay)
 {
 	arv_option_camera_name = cameraName;
+	arv_option_frequency = frequency;
+	arv_option_gv_packet_delay = delay;
 	data.buffer_count = 0;
   data.frame_number = 0;
   data.last_buffer=NULL;
@@ -97,6 +100,7 @@ void ArvDriver::startAcquisition()
 
 	camera = arv_camera_new (arv_option_camera_name);
 	g_print("camera '%s'\n", arv_option_camera_name);
+
 	if (camera != NULL) {
 		gint payload;
 		gint x, y, width, height;
@@ -129,17 +133,17 @@ void ArvDriver::startAcquisition()
 		arv_camera_set_chunks (camera, arv_option_chunks);
 		arv_camera_set_region (camera, 0, 0, 2064, 1544);  //modified by chafik
 		arv_camera_set_binning (camera, arv_option_horizontal_binning, arv_option_vertical_binning);
-		arv_camera_set_exposure_time (camera, 7500);  // 1500
+		arv_camera_set_exposure_time (camera, 3500);  // 1500 //7500
 		arv_camera_set_gain (camera, arv_option_gain);
-                arv_camera_set_pixel_format(camera, ARV_PIXEL_FORMAT_BAYER_BG_8); //added by chafik
-                arv_camera_set_frame_rate (camera, 30); //added by chafik
-                arv_camera_gv_auto_packet_size(camera); //added by chafik
+    arv_camera_set_pixel_format(camera, ARV_PIXEL_FORMAT_BAYER_BG_8); //added by chafik
+    arv_camera_set_frame_rate (camera, 30); //added by chafik
+    arv_camera_gv_auto_packet_size(camera); //added by chafik
 
 
 		if (arv_camera_is_uv_device(camera)) {
 			arv_camera_uv_set_bandwidth (camera, arv_option_bandwidth_limit);
 		}
-		
+
 		if (arv_camera_is_gv_device (camera)) {
 			arv_camera_gv_select_stream_channel (camera, arv_option_gv_stream_channel);
 			arv_camera_gv_set_packet_delay (camera, arv_option_gv_packet_delay);
@@ -207,10 +211,13 @@ void ArvDriver::startAcquisition()
 			for (i = 0; i < 50; i++)
 				arv_stream_push_buffer (stream, arv_buffer_new (payload, NULL));
 
-			arv_camera_set_acquisition_mode (camera, ARV_ACQUISITION_MODE_MULTI_FRAME);
+			arv_camera_set_acquisition_mode (camera, ARV_ACQUISITION_MODE_CONTINUOUS);
 
-			if (arv_option_frequency > 0.0)
+			if (arv_option_frequency > 0.0){
 				arv_camera_set_frame_rate (camera, arv_option_frequency);
+				printf("\nframe_rate : %lf Hz\n",arv_camera_get_frame_rate(camera));
+			}
+
 
 			if (arv_option_trigger != NULL)
 				arv_camera_set_trigger (camera, arv_option_trigger);
@@ -292,7 +299,8 @@ Mat ArvDriver::getImageFromBuffer()
 			image_data = (const char*)arv_buffer_get_data ((ArvBuffer *)data.last_buffer, &size);
 			frame = cv::Mat(height,width,CV_8UC1,(void*)image_data);
 			cvtColor(frame,frame,COLOR_BayerBG2BGR);
-			//resize(frame,frame,Size(416,416));
+			// resize(frame,frame,Size(416,416));
+			// cv::imshow("Display",frame);
 
 		}
         }

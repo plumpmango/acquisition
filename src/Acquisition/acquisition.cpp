@@ -25,7 +25,7 @@ std::string s = getCameraName();
     std::cout << charName[i];
   }
 
-  m_arv = new ArvDriver(charName);
+  m_arv = new ArvDriver(charName,getFrequency(),getDelay());
   m_arv->startAcquisition();
 
 }
@@ -42,18 +42,18 @@ void Acquisition::acquireVideo(){
 
   if(m_currentFrame.empty() && video.isOpened()){
     std::cerr << "frame " << frameNumber << " empty" << std::endl;
-    if(frameNumber == 5)
-      std::cerr << "Error : Stop acquisition" << std::endl;
+    // if(frameNumber == 5)
+    //   std::cerr << "Error : Stop acquisition" << std::endl;
 
   }
   else{
 
-    std::cout << m_currentFrame.channels() << std::endl;
+    // std::cout << m_currentFrame.channels() << std::endl;
     std::cout << m_currentFrame.size()<< std::endl;
     cv::resize(m_currentFrame,m_currentFrame,Size(416,416));
+    // cv::cvtColor(m_currentFrame,m_currentFrame,COLOR_BayerBG2BGR);
     video.write(m_currentFrame);
-
-    // cv::imshow("Display",m_currentFrame);
+    cv::imshow(getCameraName(),m_currentFrame);
   }
 
 }
@@ -61,6 +61,7 @@ void Acquisition::acquireVideo(){
 
 bool Acquisition::stopAcquisition(){
   m_arv->stopAcquisition();
+  cv::destroyAllWindows();
   if (video.isOpened())
     video.release();
   return true;

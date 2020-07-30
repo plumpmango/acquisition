@@ -15,12 +15,9 @@ Manage::Manage(std::string path,std::string name,QWidget *parent) :
     _path = path;
     _name = name;
     stopAc = true;
-    timer= new QTimer(this);
-    // if(!stopAc)
-    this->setupDevicesQueueComboBox();
-    connect(ui->startpushButton, SIGNAL (released()), this, SLOT (handleStartAcquisition()));
-    connect(ui->stoppushButton, SIGNAL (released()), this, SLOT (handleStopAcquisition()));
-    connect(timer, SIGNAL(timeout()), this, SLOT(handleAcquire()));
+
+    setupManage();
+
 }
 
 Manage::~Manage()
@@ -28,18 +25,42 @@ Manage::~Manage()
     delete ui;
 }
 
+void Manage::setupManage(){
+  timer= new QTimer(this);
+
+
+  this->setupDevicesQueueComboBox();
+  ui->lineEditFreq->setPlaceholderText("5");
+  ui->lineEditDelay->setPlaceholderText("25");
+  ui->label_4->setText("Inter Packets Delay (" + QString("\u03BC") + "s) :");
+  const QString qs = QString::fromStdString(getPath());
+  ui->labelPath->setText(qs);
+  connect(timer, SIGNAL(timeout()), this, SLOT(handleAcquire()));
+  connect(ui->lineEditFreq, SIGNAL(textChanged(const QString &)), this, SLOT(handleLineEditFreq(const QString &)));
+  connect(ui->lineEditDelay, SIGNAL(textChanged(const QString &)), this, SLOT(handleLineEditDelay(const QString &)));
+  connect(ui->selectPathpushButton, SIGNAL (released()), this, SLOT (handleButtonSelectPath()));
+  connect(ui->startpushButton, SIGNAL (released()), this, SLOT (handleStartAcquisition()));
+  connect(ui->stoppushButton, SIGNAL (released()), this, SLOT (handleStopAcquisition()));
+}
+
 void Manage::setupDevicesQueueComboBox(){
   ui->devicesQueueComboBox->clear();
-  std::queue<std::string> dQ = this->getDevicesQueue();
-  for(int i = 0; i <= dQ.size(); i++){
-    // std::cout << dQ.front() << std::endl;
-    const QString item = QString::fromStdString(dQ.front());
+  std::vector<std::string> dQ = this->getDevicesQueue();
+  if(dQ.size() == 0){
+    std::cerr << "No camera found. Please connect devices to run acquisition" << std::endl;
+    return;
+  }
+  while(dQ.size() == 0){
+    dQ = this->getDevicesQueue();
+  }
+  for(int i = 0; i < dQ.size(); i++){
+    // std::cout << dQ[i] << std::endl;
+    const QString item = QString::fromStdString(dQ[i]);
     ui->devicesQueueComboBox->addItem(item);
-    dQ.pop();
   }
 }
 
-void Manage::startAcquisition(){
+void Manage::startAcquisition(std::string nameCam){
   time_t now = time(0);
   tm *ltm = localtime(&now);
   std::string y = std::to_string(1900+ltm->tm_year);
@@ -48,19 +69,20 @@ void Manage::startAcquisition(){
   std::string h = std::to_string(ltm->tm_hour);
   std::string min = std::to_string(ltm->tm_min);
   std::string s = std::to_string(ltm->tm_sec);
-  std::cout << h << "h" << min << "min" << s << "s" << std::endl;
 
   std::string id = y + "_" + m + "_" + d + "_" + h + "_" + min + "_" + s;
-  // setName(_name + id);
+
   std::string path = getPath();
-  std::string name = getCameraName() + id;
-  this->setCameraName((ui->devicesQueueComboBox->currentText()).toStdString());
-  acq = new Acquisition(path,name,getCameraName());
+  std::string name = nameCam + id;
+  // std::cout << name << std::endl;
+
+  acq = new Acquisition(path,name,nameCam,getFrequency(),getDelay());
   stopAc = false;
   timer->start(33);
   acq->startAcquisition();
 
 }
+
 
 void Manage::stopAcquisition(){
   timer->stop();
@@ -68,7 +90,8 @@ void Manage::stopAcquisition(){
   this->setupDevicesQueueComboBox();
 }
 
-std::queue<std::string> Manage::getDevicesQueue(){
+
+std::vector<std::string> Manage::getDevicesQueue(){
 	printf ("Update Device List\n");
 
 	arv_update_device_list();
@@ -76,35 +99,65 @@ std::queue<std::string> Manage::getDevicesQueue(){
 
 	printf ("Number of found Devices: %d\n", n_devices);
 
-	std::queue<std::string> devicesQueue;
-	for (int i = 0; i < n_devices; i++)
-		devicesQueue.push(arv_get_device_id (i));
-		// printf ("%s\n", arv_get_device_id (i));
+	std::vector<std::string> devicesQueue;
+	for (int i = 0; i < n_devices; i++){
+		devicesQueue.push_back(arv_get_device_id (i));
+		printf ("%s\n", arv_get_device_id (i));
+  }
 	return devicesQueue;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////// Slots methods ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
 void Manage::handleStartAcquisition(){
-    startAcquisition();
+    startAcquisition((ui->devicesQueueComboBox->currentText()).toStdString());
 }
 
+
+
+
+
 void Manage::handleStopAcquisition(){
-    stopAcquisition();
+    if(!stopAc)
+      stopAcquisition();
 }
+
 
 void Manage::handleAcquire(){
     // if(!stopAc)
       acq->acquireVideo();
 }
 
-void Manage::keyPressEvent(QKeyEvent *event) {
-    switch(event->key()) {
-        // lance l'acquisition
-        case Qt::Key_A:
-          std::cout << "Video path : " << getPath() << std::endl;
-          if(stopAc)
-            startAcquisition();
-        case Qt::Key_S:
-          if(!stopAc)
-            stopAcquisition();
+
+void Manage::handleUpdateDevicesQueueCombobox(){
+  this->setupDevicesQueueComboBox();
+}
+
+void Manage::handleLineEditFreq(const QString &frequency){
+  std::string f = frequency.toStdString();
+  setFrequency(std::stod(f));
+}
+
+void Manage::handleLineEditDelay(const QString &delay){
+  std::string d = delay.toStdString();
+  setDelay(std::stoi(d));
+}
+
+void Manage::handleButtonSelectPath(){
+
+  if(stopAc){
+    QString currentPath= QFileDialog::getExistingDirectory(this, ("Select folder to save video"), QString::fromStdString(getPath()), QFileDialog::ShowDirsOnly );
+    if (currentPath.toStdString()!=getPath()){
+      setPath(currentPath.toStdString());
+      const QString qs = QString::fromStdString(getPath());
+      ui->labelPath->setText(qs);
     }
+  }
+
+
+
 }

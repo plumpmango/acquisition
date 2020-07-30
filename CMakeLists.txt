@@ -23,7 +23,6 @@ include_directories(${CMAKE_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set ( SOURCES
- src/main.cpp
  src/Acquisition/arvdriver.cpp
  src/Acquisition/acquisition.cpp
  src/Manage/manage.cpp
@@ -49,9 +48,17 @@ set ( UIS
 QT5_WRAP_UI( UI_HEADERS ${UIS} )
 QT5_WRAP_CPP( MOC_SRCS ${MOC_HEADERS} )
 
-add_executable( acq ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS})
+add_executable( acq  src/main.cpp ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS})
 
 target_link_libraries(acq
+  ${ARAVIS_LDFLAGS}
+  ${OpenCV_LIBS}
+  Qt5::Widgets
+)
+
+add_executable( acqMulti  src/mainMulti.cpp ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS})
+
+target_link_libraries(acqMulti
   ${ARAVIS_LDFLAGS}
   ${OpenCV_LIBS}
   Qt5::Widgets

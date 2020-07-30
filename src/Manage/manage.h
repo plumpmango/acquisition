@@ -32,29 +32,45 @@ class Manage : public QMainWindow
     Q_OBJECT
 
 public:
-  explicit Manage(std::string path,std::string name,QWidget *parent = 0);
+  explicit Manage(std::string path,std::string name = "",QWidget *parent = 0);
   ~Manage();
 private:
   inline void setName(std::string s){_name = s;};
   inline std::string getName(){return _name;};
+  inline void setPath(std::string p){_path = p;};
   inline std::string getPath(){return _path;};
-  void startAcquisition();
+  inline void setCameraName(std::string name){cameraName = name;};
+  inline std::string getCameraName(){return cameraName;};
+  inline double getFrequency(){return frequency;};
+  inline void setFrequency(double f){frequency=f;};
+  inline gint64 getDelay(){return delay;};
+  inline void setDelay(gint64 d){delay=d;};
+  void setupManage();
+  void setupDevicesQueueComboBox();
+  void startAcquisition(std::string nameCam);
   void stopAcquisition();
-  std::queue<std::string> getDevicesQueue();
+  std::vector<std::string> getDevicesQueue();
+
 
 private Q_SLOTS:
   void handleStartAcquisition();
   void handleStopAcquisition();
   void handleAcquire();
-
-protected Q_SLOTS:
-  void keyPressEvent(QKeyEvent *event) override;
+  void handleUpdateDevicesQueueCombobox();
+  void handleLineEditFreq(const QString &frequency);
+  void handleLineEditDelay(const QString &delay);
+  void handleButtonSelectPath();
 
 private:
   std::string _path;
   std::string _name;
   Acquisition *acq;
   bool stopAc;
+  std::vector<std::string> devicesQueue;
+  std::string cameraName;
+  double frequency;
+  gint64 delay;
+
 private:
    QTimer *timer;
    Ui::Manage *ui;

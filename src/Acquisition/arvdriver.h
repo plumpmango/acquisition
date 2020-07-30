@@ -8,9 +8,11 @@
 #include <arv.h>
 
 //opencv
+#include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <queue>
 #include <iostream>
+
 
 using namespace cv;
 
@@ -20,11 +22,11 @@ using namespace cv;
 */
 typedef struct {
     GMainLoop *main_loop; /*!<type de données opaques représentant la boucle principale d'une application GLib ou GTK*/
-	int buffer_count;/*!<compteur de buffer*/
+    int buffer_count;/*!<compteur de buffer*/
     int frame_number;/*!<nombre d'image*/
     ArvBuffer *last_buffer;/*!< ajouté par chafik*/
-	ArvChunkParser *chunk_parser;/*!<analyseur de token*/
-	char **chunks;/*!<tokens*/
+	  ArvChunkParser *chunk_parser;/*!<analyseur de token*/
+	  char **chunks;/*!<tokens*/
 } ApplicationData;
 
 /*! \class ArvDriver
@@ -39,7 +41,7 @@ public:
 	/*! \brief Constructeur
 	* Initialise une instance de ApplicationData
 	*/
-	ArvDriver();
+	ArvDriver(char *cameraName,double frequency = 5,gint64 delay = 25);
 	/*! \brief Destructeur
 	*/
     ~ArvDriver();
@@ -62,12 +64,12 @@ public:
 	static void stream_cb (void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer);
 
 private:
-	char *arv_option_camera_name = NULL;
+	char *arv_option_camera_name;
 	char *arv_option_debug_domains = NULL;
 	gboolean arv_option_snaphot = FALSE;
 	char *arv_option_trigger = NULL;
 	double arv_option_software_trigger = -1;
-	double arv_option_frequency = -1.0;
+	double arv_option_frequency;
 	int arv_option_width = -1;
 	int arv_option_height = -1;
 	int arv_option_horizontal_binning = 0;
@@ -80,8 +82,8 @@ private:
 	unsigned int arv_option_packet_timeout = 20;
 	unsigned int arv_option_frame_retention = 100;
 	int arv_option_gv_stream_channel = -1;
-	int arv_option_gv_packet_delay = 0; //modified by chafik (if value is diffrent from 0 it produces jerks)
-	int arv_option_gv_packet_size = -1;
+	gint64 arv_option_gv_packet_delay; //modified by chafik (if value is diffrent from 0 it produces jerks)
+  int arv_option_gv_packet_size = -1;
 	gboolean arv_option_no_packet_socket = FALSE;
 	char *arv_option_chunks = NULL;
 	unsigned int arv_option_bandwidth_limit = -1;
