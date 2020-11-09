@@ -30,8 +30,8 @@ void Manage::setupManage(){
 
 
   this->setupDevicesQueueComboBox();
-  ui->lineEditFreq->setPlaceholderText("5");
-  ui->lineEditDelay->setPlaceholderText("25");
+  ui->lineEditFreq->setPlaceholderText("10");
+  ui->lineEditDelay->setPlaceholderText("250");
   ui->label_4->setText("Inter Packets Delay (" + QString("\u03BC") + "s) :");
   const QString qs = QString::fromStdString(getPath());
   ui->labelPath->setText(qs);

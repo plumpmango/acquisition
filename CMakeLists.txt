@@ -6,6 +6,8 @@ find_package(GTK2 2.6 REQUIRED gtk)
 
 find_package(Qt5 COMPONENTS REQUIRED Core Gui Widgets)
 
+find_package(Threads REQUIRED)
+
 include(FindPkgConfig)
 pkg_search_module(ARAVIS REQUIRED aravis-0.6 aravis-0.4 aravis-0.2)
 
@@ -18,19 +20,26 @@ include_directories(
 
 include_directories(${CMAKE_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 
+
+
 # need this to include the auto generated ui_mainwindow.h
 # file from the qt5_wrap_ui call below.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set(CMAKE_CXX_STANDARD 11)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 set ( SOURCES
  src/Acquisition/arvdriver.cpp
  src/Acquisition/acquisition.cpp
+ src/Acquisition/acquisitionIP.cpp
  src/Manage/manage.cpp
 )
 
 set ( MOC_HEADERS
  src/Acquisition/arvdriver.h
  src/Acquisition/acquisition.h
+ src/Acquisition/acquisitionIP.h
  src/Manage/manage.h
 )
 
@@ -62,4 +71,13 @@ target_link_libraries(acqMulti
   ${ARAVIS_LDFLAGS}
   ${OpenCV_LIBS}
   Qt5::Widgets
+)
+
+add_executable( acqIP  src/mainIP.cpp ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS})
+
+target_link_libraries(acqIP
+  ${ARAVIS_LDFLAGS}
+  ${OpenCV_LIBS}
+  Qt5::Widgets
+  Threads::Threads
 )

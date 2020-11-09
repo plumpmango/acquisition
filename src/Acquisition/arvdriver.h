@@ -41,6 +41,7 @@ public:
 	/*! \brief Constructeur
 	* Initialise une instance de ApplicationData
 	*/
+        ArvDriver();
 	ArvDriver(char *cameraName,double frequency = 5,gint64 delay = 25);
 	/*! \brief Destructeur
 	*/
@@ -61,7 +62,7 @@ public:
     //static methods
     static gboolean emit_software_trigger (void *abstract_data);
     static void new_buffer_cb (ArvStream *stream, ApplicationData *data);
-	static void stream_cb (void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer);
+    static void stream_cb (void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer);
 
 private:
 	char *arv_option_camera_name;

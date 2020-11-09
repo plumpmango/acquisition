@@ -55,17 +55,20 @@ gboolean ArvDriver::emit_software_trigger (void *abstract_data)
 }
 
 
+ArvDriver::ArvDriver(){
+    	data.buffer_count = 0;
+        data.frame_number = 0;
+        data.last_buffer=NULL;
+	data.chunks = NULL;
+	data.chunk_parser = NULL;
+}
 
 ArvDriver::ArvDriver(char *cameraName,double frequency,gint64 delay)
 {
 	arv_option_camera_name = cameraName;
 	arv_option_frequency = frequency;
 	arv_option_gv_packet_delay = delay;
-	data.buffer_count = 0;
-  data.frame_number = 0;
-  data.last_buffer=NULL;
-	data.chunks = NULL;
-	data.chunk_parser = NULL;
+	ArvDriver();
 
 }
 
